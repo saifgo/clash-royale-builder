@@ -13,6 +13,9 @@ const PORT = process.env.PORT || 3000;
 const API_TOKEN = process.env.API_TOKEN || process.env.CLASH_ROYALE_API_TOKEN;
 const API_BASE_URL = 'https://api.clashroyale.com/v1';
 
+// API request timeout (25 seconds - Render free tier allows up to 30s)
+const API_TIMEOUT = 25000;
+
 // Enable CORS for all origins
 app.use(cors());
 app.use(express.json());
@@ -36,6 +39,42 @@ app.get('/', (req, res) => {
     }
   });
 });
+
+// Helper function to make API request with timeout
+function makeAPIRequest(apiUrl, options) {
+  return new Promise((resolve, reject) => {
+    const request = https.get(apiUrl, options, (apiRes) => {
+      let data = '';
+
+      apiRes.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      apiRes.on('end', () => {
+        resolve({
+          statusCode: apiRes.statusCode,
+          data: data,
+          headers: apiRes.headers
+        });
+      });
+    });
+
+    // Set timeout
+    request.setTimeout(API_TIMEOUT, () => {
+      request.destroy();
+      reject(new Error('API request timeout'));
+    });
+
+    request.on('error', (error) => {
+      reject(error);
+    });
+
+    request.on('timeout', () => {
+      request.destroy();
+      reject(new Error('Connection timeout'));
+    });
+  });
+}
 
 // Proxy endpoint - supports both /api/player/:tag and /api/player?tag=xxx
 app.get('/api/player/:tag', async (req, res) => {
@@ -61,21 +100,27 @@ app.get('/api/player/:tag', async (req, res) => {
     }
   };
 
-  https.get(apiUrl, options, (apiRes) => {
-    let data = '';
-
-    apiRes.on('data', (chunk) => {
-      data += chunk;
-    });
-
-    apiRes.on('end', () => {
-      res.setHeader('Content-Type', 'application/json');
-      res.status(apiRes.statusCode).send(data);
-    });
-  }).on('error', (error) => {
-    console.error('Proxy error:', error);
-    res.status(500).json({ error: error.message });
-  });
+  try {
+    const result = await makeAPIRequest(apiUrl, options);
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.status(result.statusCode).send(result.data);
+  } catch (error) {
+    console.error('Proxy error:', error.message);
+    
+    if (error.message.includes('timeout')) {
+      res.status(504).json({ 
+        error: 'Gateway Timeout',
+        message: 'The Clash Royale API took too long to respond',
+        suggestion: 'Please try again'
+      });
+    } else {
+      res.status(500).json({ 
+        error: 'Proxy Error',
+        message: error.message || 'Failed to fetch data from Clash Royale API'
+      });
+    }
+  }
 });
 
 // Also support query parameter format

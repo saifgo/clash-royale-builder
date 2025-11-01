@@ -185,30 +185,30 @@ function getCardPlaceholderUrl(cardName) {
     canvas.width = 100;
     canvas.height = 100;
     const ctx = canvas.getContext('2d');
-    
+
     // Background gradient
     const gradient = ctx.createLinearGradient(0, 0, 100, 100);
     gradient.addColorStop(0, '#1a0f0f');
     gradient.addColorStop(1, '#0a0a0a');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 100, 100);
-    
+
     // Border
     ctx.strokeStyle = '#ffd700';
     ctx.lineWidth = 2;
     ctx.strokeRect(1, 1, 98, 98);
-    
+
     // Text
     ctx.fillStyle = '#ffd700';
     ctx.font = 'bold 12px Roboto';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    
+
     // Split long names
     const words = cardName.split(' ');
     const shortName = words.length > 1 ? words[0].substring(0, 4) : cardName.substring(0, 6);
     ctx.fillText(shortName, 50, 50);
-    
+
     return canvas.toDataURL('image/png');
 }
 
@@ -217,13 +217,13 @@ function createCardImage(cardName, altText) {
     img.src = getCardImageUrl(cardName);
     img.alt = altText || cardName;
     img.loading = 'lazy';
-    
+
     img.onerror = function () {
         // Use placeholder if image fails to load
         this.src = getCardPlaceholderUrl(cardName);
         this.style.backgroundColor = 'rgba(20, 15, 10, 0.8)';
     };
-    
+
     return img;
 }
 
@@ -530,7 +530,7 @@ function saveRecentPlayer(playerData) {
     // Extract tag from playerData (API returns tag with #)
     const tag = playerData.tag?.replace(/^#/, '').replace(/-/g, '') || '';
     const name = playerData.name || 'Unknown';
-    
+
     if (!tag) {
         // Try to get tag from the input field if API doesn't return it
         const inputTag = document.getElementById('playerId').value.trim();
@@ -540,26 +540,26 @@ function saveRecentPlayer(playerData) {
         }
         return;
     }
-    
+
     savePlayerToStorage(tag, name);
 }
 
 function savePlayerToStorage(tag, name) {
     let recentPlayers = getRecentPlayers();
-    
+
     // Remove if already exists
     recentPlayers = recentPlayers.filter(p => p.tag !== tag);
-    
+
     // Add to beginning
     recentPlayers.unshift({
         tag: tag,
         name: name,
         timestamp: Date.now()
     });
-    
+
     // Keep only last 10
     recentPlayers = recentPlayers.slice(0, 10);
-    
+
     localStorage.setItem('clashRoyaleRecentPlayers', JSON.stringify(recentPlayers));
     displayRecentPlayers();
 }
@@ -577,17 +577,17 @@ function displayRecentPlayers() {
     const recentPlayers = getRecentPlayers();
     const container = document.getElementById('recentPlayersList');
     const section = document.getElementById('recentPlayers');
-    
+
     if (!container || !section) return;
-    
+
     if (recentPlayers.length === 0) {
         section.classList.add('hidden');
         return;
     }
-    
+
     section.classList.remove('hidden');
     container.innerHTML = '';
-    
+
     recentPlayers.forEach((player, index) => {
         const playerBtn = document.createElement('button');
         playerBtn.className = 'recent-player-btn';
@@ -595,12 +595,12 @@ function displayRecentPlayers() {
             <span class="recent-player-name">${escapeHtml(player.name)}</span>
             <span class="recent-player-tag">#${player.tag}</span>
         `;
-        
+
         playerBtn.addEventListener('click', () => {
             document.getElementById('playerId').value = player.tag;
             document.getElementById('fetchBtn').click();
         });
-        
+
         container.appendChild(playerBtn);
     });
 }
@@ -916,12 +916,12 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
         allOwnedCards = { ...ownedCards }; // Store copy for filtering
 
         displayPlayerInfo(playerData);
-        
+
         // Save player tag to playerData if not present
         if (!playerData.tag) {
             playerData.tag = `#${tag}`;
         }
-        
+
         saveRecentPlayer(playerData);
         displayOwnedCards(ownedCards);
 
