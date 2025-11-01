@@ -13,36 +13,83 @@ A Progressive Web App for suggesting the best Clash Royale decks based on your c
 
 ## Deployment to Vercel
 
+### ⚠️ IMPORTANT: IP Whitelisting Required
+
+**Vercel serverless functions use dynamic IPs**, but the Clash Royale developer portal **requires at least one IP address** to be whitelisted.
+
+### Solution: Use a Proxy Server with Static IP
+
+Since you must whitelist at least one IP, deploy a proxy server on a service with a **static IP**, then configure Vercel to use that proxy.
+
+**See `PROXY_SETUP_GUIDE.md` for complete step-by-step instructions.**
+
+### Quick Setup - Render.com (FREE, 2 Minutes!)
+
+**See `FREE_PROXY_SETUP.md` for complete step-by-step instructions.**
+
+1. **Deploy Proxy on Render.com** (FREE):
+   - Go to [render.com](https://render.com) and sign up (free, no credit card)
+   - Click "New +" → "Web Service"
+   - Upload files from `render-proxy/` folder: `server.js` and `package.json`
+   - Set environment variable: `API_TOKEN` = your Clash Royale token
+   - Render auto-provides static IP (check service logs or network settings)
+
+2. **Whitelist IP in Clash Royale Portal**:
+   - Get your Render static IP (from service logs or `nslookup your-service.onrender.com`)
+   - Go to [developer.clashroyale.com](https://developer.clashroyale.com/)
+   - Edit your API token
+   - Add the Render static IP to whitelist
+   - Save changes
+
+3. **Configure Vercel**:
+   - Go to Vercel Dashboard → Settings → Environment Variables
+   - Add: `PROXY_URL` = `https://your-service.onrender.com`
+   - Redeploy
+
+**That's it! Render.com is 100% free and perfect for this use case.**
+
 ### Prerequisites
 
 1. A Vercel account (sign up at [vercel.com](https://vercel.com))
-2. Your Clash Royale API token
+2. A proxy server with static IP (Railway, Render, or Fly.io - all have free tiers)
+3. Your Clash Royale API token
 
 ### Steps
 
-1. **Install Vercel CLI** (optional but recommended):
+1. **Deploy Proxy Server** (see `PROXY_SETUP_GUIDE.md`):
+   - Choose a service: Railway (easiest), Render, or Fly.io
+   - Deploy `proxy-server.js`
+   - Get the static IP address
+
+2. **Install Vercel CLI** (optional but recommended):
    ```bash
    npm i -g vercel
    ```
 
-2. **Set Environment Variable**:
+3. **Set Environment Variable**:
    - Go to your Vercel project settings
    - Navigate to "Environment Variables"
    - Add `API_TOKEN` with your Clash Royale API token value
-   - Or update `api/player.js` directly with your token (less secure)
+   - Select all environments (Production, Preview, Development)
+   - **Never commit tokens to Git**
 
-3. **Create App Icons**:
+4. **Create App Icons**:
    - Create `icon-192.png` (192x192 pixels)
    - Create `icon-512.png` (512x512 pixels)
-   - Place them in the root directory
+   - Place them in the `public/` directory
    - See `ICONS_README.md` for design guidelines
+   - Or use `generate-icons.html` in your browser
 
-4. **Deploy**:
+5. **Deploy**:
    ```bash
    vercel
    ```
    
    Or connect your GitHub repository to Vercel for automatic deployments.
+
+6. **Verify Deployment**:
+   - Test: `https://your-app.vercel.app/api/player?tag=YOURTAG`
+   - If you get `403` or `accessDenied.invalidIp`, ensure IP restrictions are removed
 
 ## Local Development
 
