@@ -6,14 +6,10 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/player",
-      "dest": "/api/player.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/api/player",
+      "destination": "/api/player.js"
     }
   ],
   "headers": [
