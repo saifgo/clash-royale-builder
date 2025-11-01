@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffd700" />
+    <meta
+      name="description"
+      content="Find the best Clash Royale decks based on your card collection"
+    />
+    <title>Clash Royale Deck Suggester</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Clash Royale Deck Suggester</h1>
+        <p class="subtitle">
+          Find the best decks based on your card collection
+        </p>
+      </header>
+
+      <div class="input-section">
+        <div class="input-group">
+          <label for="playerId">Player Tag (without #)</label>
+          <input
+            type="text"
+            id="playerId"
+            placeholder="Enter your player tag (e.g., ABC123XYZ)"
+          />
+          <button id="fetchBtn" class="btn-primary">
+            Get Deck Suggestions
+          </button>
+        </div>
+      </div>
+
+      <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>Fetching your cards...</p>
+      </div>
+
+      <div id="error" class="error hidden"></div>
+
+      <div id="playerInfo" class="player-info hidden">
+        <h2>Player: <span id="playerName"></span></h2>
+        <p>Trophies: <span id="playerTrophies"></span></p>
+      </div>
+
+      <div id="deckSuggestions" class="deck-suggestions hidden">
+        <h2 class="section-title">Meta Decks</h2>
+        <div id="decksContainer"></div>
+      </div>
+
+      <div id="aiSuggestions" class="deck-suggestions hidden">
+        <h2 class="section-title">AI-Generated Recommendations</h2>
+        <p class="ai-subtitle">
+          Custom decks tailored to your collection with optimal synergies
+        </p>
+        <div id="aiDecksContainer"></div>
+      </div>
+
+      <div id="ownedCards" class="owned-cards hidden">
+        <h2>Your Card Collection</h2>
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label for="sortBy">Sort by:</label>
+            <select id="sortBy">
+              <option value="name">Name (A-Z)</option>
+              <option value="level">Level (High to Low)</option>
+              <option value="levelAsc">Level (Low to High)</option>
+              <option value="elixir">Elixir (High to Low)</option>
+              <option value="elixirAsc">Elixir (Low to High)</option>
+              <option value="role">Role</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filterBy">Filter by:</label>
+            <select id="filterBy">
+              <option value="all">All Cards</option>
+              <option value="winCondition">Win Conditions</option>
+              <option value="support">Support</option>
+              <option value="spell">Spells</option>
+              <option value="building">Buildings</option>
+              <option value="tank">Tanks</option>
+              <option value="troop">Troops</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <button id="resetFilters" class="btn-reset">Reset</button>
+          </div>
+        </div>
+        <div id="cardsContainer"></div>
+        <div id="cardCount" class="card-count"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      // Register Service Worker for PWA
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((registration) => {
+              console.log("SW registered: ", registration);
+            })
+            .catch((registrationError) => {
+              console.log("SW registration failed: ", registrationError);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
