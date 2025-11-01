@@ -148,6 +148,65 @@ header h1 {
     background: rgba(25, 18, 12, 0.9);
 }
 
+.recent-players {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.recent-players h3 {
+    color: #ffd700;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+#recentPlayersList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.recent-player-btn {
+    background: linear-gradient(135deg, rgba(139, 69, 19, 0.6) 0%, rgba(120, 53, 15, 0.6) 100%);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 150px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.recent-player-btn:hover {
+    background: linear-gradient(135deg, rgba(139, 69, 19, 0.8) 0%, rgba(120, 53, 15, 0.8) 100%);
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+.recent-player-name {
+    color: #ffd700;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.recent-player-tag {
+    color: #d4af37;
+    font-size: 0.8rem;
+    font-weight: 600;
+    opacity: 0.9;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
 .btn-primary {
     width: 100%;
     padding: 18px;
@@ -319,6 +378,8 @@ header h1 {
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 2px 5px rgba(255, 215, 0, 0.5);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .ai-deck-card {
@@ -374,6 +435,13 @@ header h1 {
     margin-bottom: 20px;
 }
 
+.deck-header .deck-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
 .deck-title {
     font-size: 1.4rem;
     font-weight: 900;
@@ -382,6 +450,9 @@ header h1 {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
     text-transform: uppercase;
     letter-spacing: 1px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.3;
 }
 
 .deck-rating {
@@ -701,26 +772,113 @@ header h1 {
 }
 
 @media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    header {
+        padding: 25px 20px;
+    }
+
     header h1 {
-        font-size: 2rem;
+        font-size: 1.75rem;
+        letter-spacing: 1px;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .input-section {
+        padding: 20px;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+        padding-bottom: 10px;
+        line-height: 1.3;
+        word-wrap: break-word;
+    }
+
+    .section-title::after {
+        width: 60px;
+    }
+
+    .ai-subtitle {
+        font-size: 0.85rem;
+        margin-top: -15px;
+        margin-bottom: 20px;
+        padding: 0 10px;
+        line-height: 1.4;
+    }
+
+    .deck-title {
+        font-size: 1.1rem;
+        word-wrap: break-word;
+        line-height: 1.3;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .ai-badge {
+        font-size: 0.55rem;
+        padding: 2px 8px;
+        margin-left: 0;
+        margin-top: 4px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .deck-card {
+        padding: 18px;
+    }
+
+    .deck-header {
+        margin-bottom: 15px;
+    }
+
+    .deck-rating {
+        font-size: 0.95rem;
+        margin-top: 8px;
     }
 
     .deck-cards {
         grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+
+    .deck-stats {
+        font-size: 0.8rem;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .deck-stats span {
+        display: block;
+        margin-bottom: 4px;
     }
 
     #cardsContainer {
         grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 12px;
     }
     
     .filter-controls {
         flex-direction: column;
         align-items: stretch;
+        padding: 15px;
     }
     
     .filter-group {
         flex-direction: column;
         align-items: stretch;
+        width: 100%;
+    }
+    
+    .filter-group label {
+        margin-bottom: 6px;
     }
     
     .filter-group select {
@@ -729,5 +887,99 @@ header h1 {
     
     .btn-reset {
         width: 100%;
+    }
+    
+    .recent-player-btn {
+        min-width: 100%;
+    }
+
+    .recent-players h3 {
+        font-size: 0.9rem;
+    }
+
+    .player-info {
+        padding: 20px;
+    }
+
+    .player-info h2 {
+        font-size: 1.4rem;
+    }
+
+    .player-info p {
+        font-size: 1rem;
+    }
+
+    .owned-cards {
+        padding: 20px;
+    }
+
+    .owned-cards h2 {
+        font-size: 1.5rem;
+    }
+
+    .card-item,
+    .owned-card-item {
+        border-width: 2px;
+    }
+
+    #decksContainer,
+    #aiDecksContainer {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .loading {
+        padding: 30px 20px;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border-width: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+    }
+
+    .deck-title {
+        font-size: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .ai-badge {
+        font-size: 0.5rem;
+        padding: 2px 6px;
+        margin-left: 0;
+        margin-top: 4px;
+    }
+
+    .deck-card {
+        padding: 15px;
+    }
+
+    .deck-stats {
+        font-size: 0.75rem;
+    }
+
+    #cardsContainer {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 10px;
+    }
+
+    .input-section {
+        padding: 15px;
+    }
+
+    .player-info h2 {
+        font-size: 1.2rem;
     }
 }

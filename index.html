@@ -9,9 +9,36 @@
       content="Find the best Clash Royale decks based on your card collection"
     />
     <title>Clash Royale Deck Suggester</title>
-    <link rel="stylesheet" href="styles.css" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CR Deck Suggester" />
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="48x48" href="/icons/android/android-launchericon-48-48.png" />
+    <link rel="icon" type="image/png" sizes="72x72" href="/icons/android/android-launchericon-72-72.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/icons/android/android-launchericon-96-96.png" />
+    <link rel="icon" type="image/png" sizes="144x144" href="/icons/android/android-launchericon-144-144.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/android/android-launchericon-192-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/android/android-launchericon-512-512.png" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/ios/180.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/ios/152.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/ios/144.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/ios/120.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/icons/ios/114.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/icons/ios/76.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/icons/ios/72.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/icons/ios/60.png" />
+    <link rel="apple-touch-icon" sizes="57x57" href="/icons/ios/57.png" />
+    
+    <!-- Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
@@ -33,6 +60,10 @@
           <button id="fetchBtn" class="btn-primary">
             Get Deck Suggestions
           </button>
+        </div>
+        <div id="recentPlayers" class="recent-players hidden">
+          <h3>Recent Players</h3>
+          <div id="recentPlayersList"></div>
         </div>
       </div>
 
@@ -102,15 +133,42 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
-            .register("/sw.js")
+            .register("/sw.js", { scope: "/" })
             .then((registration) => {
-              console.log("SW registered: ", registration);
+              console.log("✅ Service Worker registered successfully:", registration.scope);
+              
+              // Check for updates
+              registration.addEventListener("updatefound", () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener("statechange", () => {
+                  if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                    console.log("New service worker available. Refresh to update.");
+                  }
+                });
+              });
             })
             .catch((registrationError) => {
-              console.log("SW registration failed: ", registrationError);
+              console.error("❌ Service Worker registration failed:", registrationError);
             });
         });
       }
+      
+      // Handle install prompt
+      let deferredPrompt;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log("✅ PWA install prompt available");
+        
+        // You can show a custom install button here if needed
+        // For now, browser will show native install prompt
+      });
+      
+      // Listen for app installed
+      window.addEventListener("appinstalled", () => {
+        console.log("✅ PWA installed successfully");
+        deferredPrompt = null;
+      });
     </script>
   </body>
 </html>

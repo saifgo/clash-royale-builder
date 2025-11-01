@@ -59,7 +59,7 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify({ error: error.message }));
         });
     } else {
-        // Serve the HTML file
+        // Serve static files
         const fs = require('fs');
         const path = require('path');
 
@@ -76,18 +76,26 @@ const server = http.createServer((req, res) => {
             '.json': 'application/json',
             '.png': 'image/png',
             '.jpg': 'image/jpg',
+            '.jpeg': 'image/jpeg',
             '.gif': 'image/gif',
             '.svg': 'image/svg+xml',
             '.wav': 'audio/wav',
             '.mp4': 'video/mp4',
             '.woff': 'application/font-woff',
+            '.woff2': 'font/woff2',
             '.ttf': 'application/font-ttf',
             '.eot': 'application/vnd.ms-fontobject',
             '.otf': 'application/font-otf',
             '.wasm': 'application/wasm'
         };
 
-        const contentType = mimeTypes[extname] || 'application/octet-stream';
+        // Special handling for service worker and manifest
+        let contentType = mimeTypes[extname] || 'application/octet-stream';
+        if (pathname === '/sw.js' || pathname === '/public/sw.js') {
+            contentType = 'application/javascript';
+        } else if (pathname === '/manifest.json' || pathname === '/public/manifest.json') {
+            contentType = 'application/manifest+json';
+        }
 
         fs.readFile(filePath, (error, content) => {
             if (error) {
@@ -99,7 +107,26 @@ const server = http.createServer((req, res) => {
                     res.end(`Server Error: ${error.code}`, 'utf-8');
                 }
             } else {
-                res.writeHead(200, { 'Content-Type': contentType });
+                const headers = {
+                    'Content-Type': contentType
+                };
+
+                // Service worker must not be cached
+                if (pathname === '/sw.js' || pathname === '/public/sw.js') {
+                    headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+                    headers['Pragma'] = 'no-cache';
+                    headers['Expires'] = '0';
+                }
+                // Manifest should be cached but can be revalidated
+                else if (pathname === '/manifest.json' || pathname === '/public/manifest.json') {
+                    headers['Cache-Control'] = 'public, max-age=3600';
+                }
+                // Icons can be cached for a long time
+                else if (pathname.includes('/icons/')) {
+                    headers['Cache-Control'] = 'public, max-age=31536000';
+                }
+
+                res.writeHead(200, headers);
                 res.end(content, 'utf-8');
             }
         });

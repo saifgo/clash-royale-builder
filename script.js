@@ -179,9 +179,52 @@ function getCardImageUrl(cardName) {
     return `${CARD_IMAGE_BASE}${formattedName}.png`;
 }
 
-function getCardKey(cardName) {
-    // Convert card name to API key format
-    return cardName.toUpperCase().replace(/\s+/g, '_');
+function getCardPlaceholderUrl(cardName) {
+    // Create a data URI placeholder with card name
+    const canvas = document.createElement('canvas');
+    canvas.width = 100;
+    canvas.height = 100;
+    const ctx = canvas.getContext('2d');
+    
+    // Background gradient
+    const gradient = ctx.createLinearGradient(0, 0, 100, 100);
+    gradient.addColorStop(0, '#1a0f0f');
+    gradient.addColorStop(1, '#0a0a0a');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 100, 100);
+    
+    // Border
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, 98, 98);
+    
+    // Text
+    ctx.fillStyle = '#ffd700';
+    ctx.font = 'bold 12px Roboto';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Split long names
+    const words = cardName.split(' ');
+    const shortName = words.length > 1 ? words[0].substring(0, 4) : cardName.substring(0, 6);
+    ctx.fillText(shortName, 50, 50);
+    
+    return canvas.toDataURL('image/png');
+}
+
+function createCardImage(cardName, altText) {
+    const img = document.createElement('img');
+    img.src = getCardImageUrl(cardName);
+    img.alt = altText || cardName;
+    img.loading = 'lazy';
+    
+    img.onerror = function () {
+        // Use placeholder if image fails to load
+        this.src = getCardPlaceholderUrl(cardName);
+        this.style.backgroundColor = 'rgba(20, 15, 10, 0.8)';
+    };
+    
+    return img;
 }
 
 async function fetchPlayerData(playerTag) {
@@ -477,6 +520,97 @@ function displayPlayerInfo(playerData) {
     document.getElementById('playerInfo').classList.remove('hidden');
 }
 
+// localStorage functions for recent players
+function saveRecentPlayer(playerData) {
+    // Extract tag from playerData (API returns tag with #)
+    const tag = playerData.tag?.replace(/^#/, '').replace(/-/g, '') || '';
+    const name = playerData.name || 'Unknown';
+    
+    if (!tag) {
+        // Try to get tag from the input field if API doesn't return it
+        const inputTag = document.getElementById('playerId').value.trim();
+        if (inputTag) {
+            const finalTag = inputTag.replace(/^#/, '').replace(/-/g, '');
+            savePlayerToStorage(finalTag, name);
+        }
+        return;
+    }
+    
+    savePlayerToStorage(tag, name);
+}
+
+function savePlayerToStorage(tag, name) {
+    let recentPlayers = getRecentPlayers();
+    
+    // Remove if already exists
+    recentPlayers = recentPlayers.filter(p => p.tag !== tag);
+    
+    // Add to beginning
+    recentPlayers.unshift({
+        tag: tag,
+        name: name,
+        timestamp: Date.now()
+    });
+    
+    // Keep only last 10
+    recentPlayers = recentPlayers.slice(0, 10);
+    
+    localStorage.setItem('clashRoyaleRecentPlayers', JSON.stringify(recentPlayers));
+    displayRecentPlayers();
+}
+
+function getRecentPlayers() {
+    try {
+        const stored = localStorage.getItem('clashRoyaleRecentPlayers');
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function displayRecentPlayers() {
+    const recentPlayers = getRecentPlayers();
+    const container = document.getElementById('recentPlayersList');
+    const section = document.getElementById('recentPlayers');
+    
+    if (!container || !section) return;
+    
+    if (recentPlayers.length === 0) {
+        section.classList.add('hidden');
+        return;
+    }
+    
+    section.classList.remove('hidden');
+    container.innerHTML = '';
+    
+    recentPlayers.forEach((player, index) => {
+        const playerBtn = document.createElement('button');
+        playerBtn.className = 'recent-player-btn';
+        playerBtn.innerHTML = `
+            <span class="recent-player-name">${escapeHtml(player.name)}</span>
+            <span class="recent-player-tag">#${player.tag}</span>
+        `;
+        
+        playerBtn.addEventListener('click', () => {
+            document.getElementById('playerId').value = player.tag;
+            document.getElementById('fetchBtn').click();
+        });
+        
+        container.appendChild(playerBtn);
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function clearRecentPlayers() {
+    localStorage.removeItem('clashRoyaleRecentPlayers');
+    displayRecentPlayers();
+}
+
 // Store owned cards globally
 let ownedCards = {};
 let allOwnedCards = {}; // Store original for filtering
@@ -558,12 +692,7 @@ function displayOwnedCards(ownedCards, sortBy = 'name', filterBy = 'all') {
             cardDiv.setAttribute('data-elixir', meta.elixir);
         }
 
-        const img = document.createElement('img');
-        img.src = getCardImageUrl(name);
-        img.alt = name;
-        img.onerror = function () {
-            this.src = 'https://via.placeholder.com/100?text=' + encodeURIComponent(name.substring(0, 3));
-        };
+        const img = createCardImage(name, name);
 
         const levelSpan = document.createElement('span');
         levelSpan.className = 'card-level';
@@ -622,12 +751,7 @@ function displayDecks(decks) {
             cardDiv.setAttribute('data-card-name', cardName);
             cardDiv.title = cardName; // Fallback tooltip
 
-            const img = document.createElement('img');
-            img.src = getCardImageUrl(cardName);
-            img.alt = cardName;
-            img.onerror = function () {
-                this.src = 'https://via.placeholder.com/100?text=' + encodeURIComponent(cardName.substring(0, 3));
-            };
+            const img = createCardImage(cardName, cardName);
 
             const owned = ownedCards[cardName];
             if (owned) {
@@ -721,12 +845,7 @@ function displayAIDecks(decks, ownedCards) {
             cardDiv.setAttribute('data-card-name', cardName);
             cardDiv.title = cardName;
 
-            const img = document.createElement('img');
-            img.src = getCardImageUrl(cardName);
-            img.alt = cardName;
-            img.onerror = function () {
-                this.src = 'https://via.placeholder.com/100?text=' + encodeURIComponent(cardName.substring(0, 3));
-            };
+            const img = createCardImage(cardName, cardName);
 
             const owned = ownedCards[cardName];
             if (owned) {
@@ -792,6 +911,13 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
         allOwnedCards = { ...ownedCards }; // Store copy for filtering
 
         displayPlayerInfo(playerData);
+        
+        // Save player tag to playerData if not present
+        if (!playerData.tag) {
+            playerData.tag = `#${tag}`;
+        }
+        
+        saveRecentPlayer(playerData);
         displayOwnedCards(ownedCards);
 
         // Display meta decks
@@ -847,5 +973,10 @@ document.getElementById('resetFilters').addEventListener('click', () => {
     document.getElementById('sortBy').value = 'name';
     document.getElementById('filterBy').value = 'all';
     displayOwnedCards(allOwnedCards, 'name', 'all');
+});
+
+// Load recent players on page load
+document.addEventListener('DOMContentLoaded', () => {
+    displayRecentPlayers();
 });
 
