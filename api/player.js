@@ -14,11 +14,11 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Extract player tag from URL
-  const playerTag = req.query.tag || req.url.split('/player/')[1]?.split('/')[0]?.replace(/#/g, '');
+  // Extract player tag from query parameter
+  const playerTag = req.query.tag;
   
   if (!playerTag) {
-    res.status(400).json({ error: 'Player tag is required' });
+    res.status(400).json({ error: 'Player tag is required. Use ?tag=YOURTAG' });
     return;
   }
 
@@ -32,20 +32,23 @@ module.exports = async (req, res) => {
     }
   };
 
-  https.get(apiUrl, options, (apiRes) => {
-    let data = '';
+  return new Promise((resolve, reject) => {
+    https.get(apiUrl, options, (apiRes) => {
+      let data = '';
 
-    apiRes.on('data', (chunk) => {
-      data += chunk;
-    });
+      apiRes.on('data', (chunk) => {
+        data += chunk;
+      });
 
-    apiRes.on('end', () => {
-      res.setHeader('Content-Type', 'application/json');
-      res.status(apiRes.statusCode).send(data);
+      apiRes.on('end', () => {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(apiRes.statusCode).send(data);
+        resolve();
+      });
+    }).on('error', (error) => {
+      console.error('Proxy error:', error);
+      res.status(500).json({ error: error.message });
+      resolve();
     });
-  }).on('error', (error) => {
-    console.error('Proxy error:', error);
-    res.status(500).json({ error: error.message });
   });
 };
-

@@ -1,17 +1,4 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/player.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/player",
-      "destination": "/api/player.js"
-    }
-  ],
   "headers": [
     {
       "source": "/sw.js",
