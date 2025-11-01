@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Generator - Clash Royale Deck Suggester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #ffd700;
+        }
+        .container {
+            background: rgba(30, 20, 15, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .preview {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .icon-preview {
+            text-align: center;
+            padding: 20px;
+            background: rgba(20, 15, 10, 0.8);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        canvas {
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a0f0f;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(20, 15, 10, 0.6);
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+        }
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Clash Royale Deck Suggester - Icon Generator</h1>
+        
+        <div class="preview">
+            <div class="icon-preview">
+                <h3>192x192 Icon</h3>
+                <canvas id="canvas192" width="192" height="192"></canvas>
+                <br>
+                <button onclick="downloadIcon(192)">Download 192x192 PNG</button>
+            </div>
+            
+            <div class="icon-preview">
+                <h3>512x512 Icon</h3>
+                <canvas id="canvas512" width="512" height="512"></canvas>
+                <br>
+                <button onclick="downloadIcon(512)">Download 512x512 PNG</button>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button onclick="generateIcons()">Regenerate Icons</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Click "Download 192x192 PNG" to save the smaller icon</li>
+                <li>Click "Download 512x512 PNG" to save the larger icon</li>
+                <li>Save both files as <code>icon-192.png</code> and <code>icon-512.png</code> in your project root</li>
+                <li>The icons will automatically be used by the PWA manifest</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const scale = size / 512;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Background gradient
+            const bgGrad = ctx.createLinearGradient(0, 0, size, size);
+            bgGrad.addColorStop(0, '#1a0f0f');
+            bgGrad.addColorStop(1, '#0a0a0a');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Gold gradient
+            const goldGrad = ctx.createLinearGradient(0, 0, size, size);
+            goldGrad.addColorStop(0, '#ffd700');
+            goldGrad.addColorStop(0.5, '#ffed4e');
+            goldGrad.addColorStop(1, '#ffd700');
+            
+            // Decorative corner circles
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.2)';
+            const cornerRadius = 25 * scale;
+            ctx.beginPath();
+            ctx.arc(80 * scale, 80 * scale, cornerRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc((512 - 80) * scale, 80 * scale, cornerRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(80 * scale, (512 - 80) * scale, cornerRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc((512 - 80) * scale, (512 - 80) * scale, cornerRadius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Crown (scaled)
+            ctx.fillStyle = goldGrad;
+            ctx.strokeStyle = '#8b6914';
+            ctx.lineWidth = 5 * scale;
+            
+            ctx.beginPath();
+            ctx.moveTo(130 * scale, 370 * scale);
+            ctx.lineTo(160 * scale, 270 * scale);
+            ctx.lineTo(210 * scale, 320 * scale);
+            ctx.lineTo(256 * scale, 185 * scale);
+            ctx.lineTo(302 * scale, 320 * scale);
+            ctx.lineTo(352 * scale, 270 * scale);
+            ctx.lineTo(382 * scale, 370 * scale);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Crown jewels
+            ctx.fillStyle = '#8b6914';
+            ctx.beginPath();
+            ctx.arc(185 * scale, 290 * scale, 12 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(256 * scale, 215 * scale, 15 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(327 * scale, 290 * scale, 12 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Card symbol
+            const cardX = 200 * scale;
+            const cardY = 400 * scale;
+            const cardW = 112 * scale;
+            const cardH = 80 * scale;
+            
+            ctx.fillStyle = goldGrad;
+            ctx.strokeStyle = '#8b6914';
+            ctx.lineWidth = 4 * scale;
+            
+            ctx.beginPath();
+            ctx.roundRect(cardX, cardY, cardW, cardH, 8 * scale);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Card lines
+            ctx.strokeStyle = '#8b6914';
+            ctx.lineWidth = 3 * scale;
+            ctx.beginPath();
+            ctx.moveTo(230 * scale, 425 * scale);
+            ctx.lineTo(282 * scale, 425 * scale);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(230 * scale, 455 * scale);
+            ctx.lineTo(282 * scale, 455 * scale);
+            ctx.stroke();
+        }
+        
+        function generateIcons() {
+            const canvas192 = document.getElementById('canvas192');
+            const canvas512 = document.getElementById('canvas512');
+            
+            drawIcon(canvas192, 192);
+            drawIcon(canvas512, 512);
+        }
+        
+        function downloadIcon(size) {
+            const canvas = document.getElementById(`canvas${size}`);
+            const link = document.createElement('a');
+            link.download = `icon-${size}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Add roundRect polyfill if needed
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+        
+        // Generate icons on load
+        window.addEventListener('load', generateIcons);
+    </script>
+</body>
+</html>
+

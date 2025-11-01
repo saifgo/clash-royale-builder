@@ -1,0 +1,22 @@
+{
+  "name": "clash-royale-deck-suggester",
+  "version": "1.0.0",
+  "description": "Clash Royale Deck Suggester - PWA",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'Build complete'",
+    "dev": "node server.js",
+    "generate-icons": "node generate-icons.js"
+  },
+  "keywords": ["clash-royale", "deck-suggester", "pwa"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.x"
+  },
+  "optionalDependencies": {
+    "canvas": "^2.11.2"
+  }
+}
+
